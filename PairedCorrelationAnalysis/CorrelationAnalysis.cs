@@ -7,57 +7,94 @@ namespace PairedCorrelationAnalysis
 
     public class CorrelationAnalysis
     {
+        private double[] _x;
+        private double[] _y;
 
         public double[] X
         {
-            get => this.X;
+            get => this._x;
             set
             {
-                if (Y != default && Y.Length != value.Length)
+                if (this.Y != null && this.Y.Length != value.Length)
                     throw new ArgumentException(
                         $"{nameof(this.Y)} is already initialized; {nameof(this.X)} length should be equal to {nameof(this.Y)} length",
                         nameof(value)); 
                 
-                this.X = value;
+                this._x = value;
             }
         }
 
         public double[] Y
         {
-            get => this.Y;
+            get => this._y;
             set
             {
-                if (X != default && X.Length != value.Length)
+                if (X != null && X.Length != value.Length)
                     throw new ArgumentException(
                         $"{nameof(this.X)} is already initialized; {nameof(this.Y)} length should be equal to {nameof(this.X)} length",
                         nameof(value));
 
-                this.Y = value;
+                this._y = value;
             }
         }
 
-        private IEnumerable<double> CovXYMultp
+        private double XAvg
         {
             get
             {
-                if (this.X == null)
-                    throw new ArgumentNullException(nameof(this.X), $"{nameof(this.X)} cannot be Null");
-                if (this.Y == null)
-                    throw new ArgumentNullException(nameof(this.X), $"{nameof(this.Y)} cannot be Null");
-                
-                return X.Zip(Y, (x, y) => x * y);
+                if (X == null)
+                    throw new ArgumentNullException(nameof(X), $"{nameof(X)} should be initialized first");
+
+                return X.Average();
             }
         }
 
-        private double[] CovXYAvrg { get; set; }
+        public double YAvg
+        {
+            get
+            {
+                if (Y == null)
+                    throw new ArgumentNullException(nameof(Y), $"{nameof(Y)} should be initialized first");
 
-        private double[] VarX { get; set; }
-        private double[] VarXAvrg { get; set; }
+                return Y.Average();
+            }
+        }
 
-        private double[] VarY { get; set; }
-        private double[] VarYAvrg { get; set; }
+        private double CovXY
+        {
+            get
+            {
+                if (X == null) 
+                    throw new ArgumentNullException(nameof(X), $"{nameof(X)} should be initialized first");
+                if (Y == null) 
+                    throw new ArgumentNullException(nameof(Y), $"{nameof(Y)} should be initialized first");
+                
+                var xyAvg = this.X.Zip(this.Y, (x, y) => x * y).Average();
+                var MultOfXYAvrgs = XAvg * YAvg;
 
+                return xyAvg * MultOfXYAvrgs;
+            }
+        }
 
+        private double VarX
+        {
+            get
+            {
+                var xSqr = X.Select(p => p * p).Average();
+
+                return xSqr - XAvg * XAvg;
+            }
+        }
+
+        private double VarY
+        {
+            get
+            {
+                var ySqr = Y.Select(p => p * p).Average();
+
+                return ySqr - YAvg * YAvg;
+            }
+        }
 
     }
 }
