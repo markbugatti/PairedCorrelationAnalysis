@@ -10,6 +10,18 @@ namespace PairedCorrelationAnalysis
         private double[] _x;
         private double[] _y;
 
+        public CorrelationAnalysis(double[] xMul, double[] yMul)
+        {
+            this.X = xMul;
+            this.Y = yMul;
+        }
+
+        public CorrelationAnalysis(IEnumerable<double> xMul, IEnumerable<double> yMul)
+        {
+            this.X = xMul.ToArray();
+            this.Y = yMul.ToArray();
+        }
+
         public double[] X
         {
             get => this._x;
@@ -49,7 +61,7 @@ namespace PairedCorrelationAnalysis
             }
         }
 
-        public double YAvg
+        private double YAvg
         {
             get
             {
@@ -60,7 +72,7 @@ namespace PairedCorrelationAnalysis
             }
         }
 
-        private double CovXY
+        public double CovXY
         {
             get
             {
@@ -72,11 +84,11 @@ namespace PairedCorrelationAnalysis
                 var xyAvg = this.X.Zip(this.Y, (x, y) => x * y).Average();
                 var MultOfXYAvrgs = XAvg * YAvg;
 
-                return xyAvg * MultOfXYAvrgs;
+               return xyAvg - MultOfXYAvrgs;
             }
         }
 
-        private double VarX
+        public double VarX
         {
             get
             {
@@ -86,7 +98,7 @@ namespace PairedCorrelationAnalysis
             }
         }
 
-        private double VarY
+        public double VarY
         {
             get
             {
