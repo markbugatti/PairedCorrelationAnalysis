@@ -10,24 +10,36 @@ namespace PairedCorrelationAnalysis
         private double[] _x;
         private double[] _y;
 
+        public CorrelationAnalysis()
+        {
+        }
+
         public CorrelationAnalysis(double[] xMul, double[] yMul)
         {
-            this.X = xMul;
-            this.Y = yMul;
+            this._x = xMul;
+            this._y = yMul;
         }
 
         public CorrelationAnalysis(IEnumerable<double> xMul, IEnumerable<double> yMul)
         {
-            this.X = xMul.ToArray();
-            this.Y = yMul.ToArray();
+            this._x = xMul.ToArray();
+            this._y = yMul.ToArray();
         }
 
+        /// <summary>
+        /// The sample of independent values
+        /// </summary>
         public double[] X
         {
-            get => this._x;
+            get
+            {
+                if (this._x == null) throw new NullReferenceException($"{nameof(X)} should be initialized first");
+
+                return this._x;
+            }
             set
             {
-                if (this.Y != null && this.Y.Length != value.Length)
+                if (this._y != null && this._y.Length != value.Length)
                     throw new ArgumentException(
                         $"{nameof(this.Y)} is already initialized; {nameof(this.X)} length should be equal to {nameof(this.Y)} length",
                         nameof(value)); 
@@ -36,12 +48,21 @@ namespace PairedCorrelationAnalysis
             }
         }
 
+        /// <summary>
+        /// The sample of dependent values corresponding to X.
+        /// Each single value in this sample should correspond to values in X sample.
+        /// </summary>
         public double[] Y
         {
-            get => this._y;
+            get
+            {
+                if (this._y == null) throw new NullReferenceException($"{nameof(Y)} should be initialized first");
+                
+                return this._y;
+            }
             set
             {
-                if (X != null && X.Length != value.Length)
+                if (_x != null && _x.Length != value.Length)
                     throw new ArgumentException(
                         $"{nameof(this.X)} is already initialized; {nameof(this.Y)} length should be equal to {nameof(this.X)} length",
                         nameof(value));
@@ -49,7 +70,10 @@ namespace PairedCorrelationAnalysis
                 this._y = value;
             }
         }
-
+        
+        /// <summary>
+        /// Average of sample X 
+        /// </summary>
         private double XAvg
         {
             get
@@ -61,6 +85,9 @@ namespace PairedCorrelationAnalysis
             }
         }
 
+        /// <summary>
+        /// Average of sample Y 
+        /// </summary>
         private double YAvg
         {
             get
@@ -72,6 +99,9 @@ namespace PairedCorrelationAnalysis
             }
         }
 
+        /// <summary>
+        /// Sample covariance (Вибіркова коваріація)
+        /// </summary>
         public double CovXY
         {
             get
@@ -80,7 +110,7 @@ namespace PairedCorrelationAnalysis
                     throw new ArgumentNullException(nameof(X), $"{nameof(X)} should be initialized first");
                 if (Y == null) 
                     throw new ArgumentNullException(nameof(Y), $"{nameof(Y)} should be initialized first");
-                
+
                 var xyAvg = this.X.Zip(this.Y, (x, y) => x * y).Average();
                 var MultOfXYAvrgs = XAvg * YAvg;
 
@@ -88,25 +118,37 @@ namespace PairedCorrelationAnalysis
             }
         }
 
+        /// <summary>
+        /// X's sample variance (Вибіркова дисперсія X)
+        /// </summary>
         public double VarX
         {
             get
             {
+                if (X == null) throw new ArgumentNullException(nameof(X), $"{nameof(X)} should be initialized first");
+                
                 var xSqr = X.Select(p => p * p).Average();
-
                 return xSqr - XAvg * XAvg;
             }
         }
 
+        /// <summary>
+        /// Y's sample variance (Вибіркова дисперсія Y)
+        /// </summary>
         public double VarY
         {
             get
             {
-                var ySqr = Y.Select(p => p * p).Average();
+                if (Y == null) throw new ArgumentNullException(nameof(Y), $"{nameof(Y)} should be initialized first");
 
+                var ySqr = Y.Select(p => p * p).Average();
                 return ySqr - YAvg * YAvg;
             }
         }
 
+        /// <summary>
+        /// The correlation coefficient (Коефіцієнт кореляції)
+        /// </summary>
+        public double CorrelationCoefficient => CovXY / Math.Sqrt(VarX * VarY);
     }
 }
